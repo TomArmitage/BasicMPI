@@ -20,48 +20,6 @@ def Hello(MyRank=MyRank,comm=comm):
 
     return
 
-def UpVsmall(MyRank=MyRank,comm=comm,NProcs=NProcs):
-
-    ArraySize=int(1e8)
-    
-    NumPerProc=ArraySize/NProcs
-    Remain=ArraySize%NProcs
-
-    if MyRank-Remain<0:
-        Additional=1
-    else:
-        Additional=0
-
-    LocArray=np.ones(NumPerProc+Additional)
-
-    LocSum=np.sum(LocArray,dtype=np.int64)
-
-    time0=time()
-    Tot=np.zeros(1,dtype=np.int64)
-
-    #print str(MyRank)+' '+str(LocSum)
-
-    comm.Reduce([LocSum,MPI.__TypeDict__[LocSum.dtype.char]],[Tot,MPI.__TypeDict__[Tot.dtype.char]],op=MPI.SUM,root=0)
-
-    time1=time()
-    #if MyRank==0: print Tot,time1-time0
-
-    Tot=np.zeros(1,dtype=np.int64)
-    comm.reduce(LocSum,Tot,op=MPI.SUM,root=0)
-
-    time2=time()
-    #if MyRank==0: print Tot,time2-time1
-
-    time3=time()
-    Tot=np.zeros(1,dtype=np.int64)
-    dump=np.sum(Tot)
-    time4=time()
-
-    if MyRank==0:
-        print 'Serial ',time4-time3
-        print 'Lower  ',time2-time1
-        print 'Upper  ',time1-time0
-
 def coresum(data,MyRank=MyRank,comm=comm,NProcs=NProcs):
     # Adds together all data in a array cell by cell and sends to all cores
     # source: D Barnes
